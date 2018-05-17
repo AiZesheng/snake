@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>贪吃蛇</title>
+	<link rel="stylesheet" href="bootstrap-3.3.5-dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/common.css">
+</head>
+<body>
+  <h3 class="center mt-30">贪吃蛇</h3>
+	<div id="main">
+    <div class="clearfix">
+  		<div class="fz-18">当前玩家：<span id="username"></span></div>
+  		<div class="fz-18">段位：<span id="rank"></span></div>
+    </div>
+    <div class="row mt-80">
+      <div class="col-md-4 center">
+        <button type="button" class="btn btn-danger btn-lg" id="wujin">无尽模式</button>
+      </div>
+      <div class="col-md-4 center">
+        <button type="button" class="btn btn-info btn-lg" id="xianshi">限时模式</button>
+      </div>
+      <div class="col-md-4 center">
+        <button type="button" class="btn btn-success btn-lg" id="paiwei">排位模式</button>
+      </div>
+      <div class="pull-right mt-80">
+        <button type="button" class="btn btn-default mr-20">游戏说明</button>
+        <button type="button" class="btn btn-default" id="quick">退出帐号</button>
+      </div>
+    </div>
+	</div>
+	<script src="bootstrap-3.3.5-dist/js/jquery.min.js"></script>
+	<script src="bootstrap-3.3.5-dist/js/bootstrap.js"></script>
+  <script>
+    var loginUser = JSON.parse(sessionStorage.loginUser)[0];
+    $('#username').html(loginUser.username);
+    $('#rank').html(loginUser.rank);
+    $('#quick').on('click', function () {
+      sessionStorage.loginUser = '';
+      window.location = 'login.html';
+    });
+    $('#wujin').on('click', function () {
+      window.location = 'wujin.html';
+    });
+    $('#xianshi').on('click', function () {
+      window.location = 'xianshi.html';
+    });
+    $('#paiwei').on('click', function () {
+      window.location = 'paiwei.html';
+    });
+  </script>
+</body>
+</html>

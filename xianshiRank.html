@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>限时模式排行榜</title>
+  <link rel="stylesheet" href="bootstrap-3.3.5-dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/common.css">
+</head>
+<body>
+	<h3 class="center mt-30">限时模式排行榜</h3>
+  <div id="main">
+    <table class="table table-bordered" id="wujinTable">
+      <tr>
+        <td>#</td>
+        <td>玩家</td>
+        <td>分数</td>
+        <td>段位</td>
+      </tr>
+    </table>
+    <button class="btn btn-default" id="back">返回</button>
+  </div>
+  <script src="bootstrap-3.3.5-dist/js/jquery.min.js"></script>
+  <script src="bootstrap-3.3.5-dist/js/bootstrap.js"></script>
+  <script>
+    var oTable = document.getElementById('wujinTable');
+    var str = '';
+    // 发请求拿限时模式记录
+    $.post('http://localhost/snake_php/api/getXianShiAll', function (res) {
+      var arr = JSON.parse(res);
+      arr.map(function (item, index) {
+        str += `<tr>
+          <td>${index + 1}</td>
+          <td>${item.username}</td>
+          <td>${item.score}</td>
+          <td>${item.rank}</td>
+        </tr>`;
+      });
+      oTable.innerHTML += str;
+    });
+    var oBack = document.getElementById('back');
+    oBack.onclick = function () {
+      window.location = 'xianshi.html';
+    };
+  </script>
+</body>
+</html>

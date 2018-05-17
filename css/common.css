@@ -1,0 +1,33 @@
+.center {
+	text-align: center;
+}
+#login {
+	width: 600px;
+	margin: 0 auto;
+}
+.pb-15 {
+	padding-bottom: 15px;
+}
+#main {
+	width: 600px;
+	margin: 0 auto;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	padding: 30px;
+	margin-top: 30px;
+}
+.fz-18 {
+	font-size: 18px;
+}
+.mr-20 {
+	margin-right: 20px;
+}
+.mt-80 {
+	margin-top: 80px;
+}
+.mt-30 {
+	margin-top: 30px;
+}
+.table td {
+	text-align: center;
+}

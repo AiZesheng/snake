@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>用户注册</title>
+	<link rel="stylesheet" href="bootstrap-3.3.5-dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/common.css">
+</head>
+<body>
+  <div id="login">
+    <h3 class="center pb-15">用户注册</h3>
+  	<form class="form-horizontal">
+  	  <div class="form-group">
+  	    <label for="inputEmail3" class="col-sm-3 control-label">请输入用户名</label>
+  	    <div class="col-sm-9">
+  	      <input type="text" class="form-control" id="inputEmail3" placeholder="请输入用户名">
+  	    </div>
+  	  </div>
+  	  <div class="form-group">
+        <label for="inputPassword3" class="col-sm-3 control-label">请输入密码</label>
+        <div class="col-sm-9">
+          <input type="password" class="form-control" id="inputPassword3" placeholder="请输入密码">
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="inputPassword3" class="col-sm-3 control-label">请再次输入密码</label>
+        <div class="col-sm-9">
+          <input type="password" class="form-control" id="inputPassword4" placeholder="请再次输入密码">
+        </div>
+      </div>
+  	  <div class="form-group">
+  	    <div class="col-sm-offset-2 col-sm-4">
+          <button id="doRegist" type="button" class="btn btn-success">&nbsp;&nbsp;注 册&nbsp;&nbsp;</button>
+        </div>
+        <div class="col-sm-offset-2 col-sm-4">
+          <button id="back" type="button" class="btn btn-primary">&nbsp;&nbsp;返 回&nbsp;&nbsp;</button>
+        </div>
+  	  </div>
+  	</form>
+    <!-- 弹框 -->
+    <div id="usernameDialog" class="modal fade" tabindex="-1" role="dialog">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">提示</h4>
+          </div>
+          <div class="modal-body">
+            <h4>用户名不能为空</h4>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">确定</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    <!-- 弹框 -->
+    <div id="passwordDialog" class="modal fade" tabindex="-1" role="dialog">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">提示</h4>
+          </div>
+          <div class="modal-body">
+            <h4>密码不能为空</h4>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">确定</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    <div id="errorDialog" class="modal fade" tabindex="-1" role="dialog">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">提示</h4>
+          </div>
+          <div class="modal-body">
+            <h4>用户名或密码输入错误</h4>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">确定</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    <div id="same" class="modal fade" tabindex="-1" role="dialog">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">提示</h4>
+          </div>
+          <div class="modal-body">
+            <h4>两次输入的密码不一致</h4>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">确定</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    <div id="have" class="modal fade" tabindex="-1" role="dialog">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">提示</h4>
+          </div>
+          <div class="modal-body">
+            <h4>该用户已存在</h4>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">确定</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    <div id="success" class="modal fade" tabindex="-1" role="dialog">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">提示</h4>
+          </div>
+          <div class="modal-body">
+            <h4>注册成功</h4>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">确定</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+  </div>
+
+	<script src="bootstrap-3.3.5-dist/js/jquery.min.js"></script>
+	<script src="bootstrap-3.3.5-dist/js/bootstrap.js"></script>
+  <script>
+    var oSubmit = document.getElementById('doRegist');
+    var oUsername = document.getElementById('inputEmail3');
+    var oPassword = document.getElementById('inputPassword3');
+    var oPassword2 = document.getElementById('inputPassword4');
+    var oBack = document.getElementById('back');
+    oBack.onclick = function () {
+      window.location = 'login.html';
+    };
+    oSubmit.onclick = function () {
+      if (oUsername.value == '') {
+        $('#usernameDialog').modal();
+        return false;
+      }
+      if (oPassword.value == '') {
+        $('#passwordDialog').modal();
+        return false;
+      }
+      if (oPassword.value != oPassword2.value) {
+        $('#same').modal();
+        return false;
+      }
+      var params = {
+        username: oUsername.value,
+        password: oPassword.value
+      };
+      // 先查询数据库中是否存在该username
+      $.post('http://localhost/snake_php/api/getByUsername', {username: oUsername.value}, function (res) {
+        if (res == 1) { // 数据库中已存在
+          $('#have').modal();
+        } else {
+          // 发请求 把用户存入数据库
+          $.post('http://localhost/snake_php/api/addUser', params, function (res) {
+            if (res == 1) {
+              $('#success').modal();
+              $('#success').on('hidden.bs.modal', function (e) {
+                window.location = 'login.html';
+              })
+            }
+          });
+        }
+      });
+    };
+  </script>
+</body>
+</html>

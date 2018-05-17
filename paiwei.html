@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>排位模式</title>
+	<link rel="stylesheet" href="css/common.css">
+	<style>
+		*{
+			margin: 0;
+			padding: 0;
+		}
+		a{
+			text-decoration: none;
+		}
+		#container{
+			width: 1000px;
+			border: 1px solid #000;
+			margin: 0 auto;
+		}
+		#ground{
+			width: 1000px;
+			height: 500px;
+			background: #ccc;
+			position: relative;
+		}
+		#ground .block{
+			width: 20px;
+			height: 20px;
+			background: #0f0;
+			float: left;
+		}
+		#ground .section{
+			width: 20px;
+			height: 20px;
+			background: #000;
+			float: left;
+			position: absolute;
+			top: 60px;
+		}
+		#ground .food{
+			width: 20px;
+			height: 20px;
+			background: red;
+			position: absolute;
+		}
+		#ground .zhangAi {
+			width: 20px;
+			height: 20px;
+			background: blue;
+			position: absolute;
+		}
+		#control{
+			width: 1000px;
+			height: 50px;
+		}
+		#start,#ranking-list,#insturction,#over{
+			display: block;
+			width: 90px;
+			height: 30px;
+			line-height: 30px;
+			background: #000;
+			color: #fff;
+			text-align: center;
+			float: right;
+			font-size: 13px;
+			margin-top: 10px;
+			margin-right: 20px;
+			opacity: 0.7;
+		}
+		#control a:hover{
+			opacity: 1;
+		}
+		#control p{
+			float: left;
+			line-height: 50px;
+			font-weight: bold;
+			padding-left: 20px;
+		}
+		#game-type {
+			text-align: center;
+		}
+		#header {
+			width: 1002px;
+			margin: 0 auto;
+			line-height: 40px;
+		}
+		.ml-score {
+			margin-left: 350px;
+		}
+		.ml-time {
+			margin-left: 270px;
+		}
+		.ml-20 {
+			margin-left: 20px;
+		}
+	</style>
+</head>
+<body>
+	<div id="header">
+		<span>游戏模式：</span><span>排位模式</span>
+		<span class="ml-time">当前段位：</span><span id="rank"></span>
+		<span class="ml-score">得分：</span><span class="score">0</span>
+	</div>
+	<div id="container">
+		<div id="ground"></div>
+		<div id="control">
+			<p>玩家：<span id="player"></span><span class="ml-20">(蓝色代表障碍物，红色代表食物)</span></p>
+			<a href="javascript:;" id="start">游戏开始</a>
+			<a href="javascript:;" id="over">退出游戏</a>
+		</div>
+	</div>
+	<script src="bootstrap-3.3.5-dist/js/jquery.min.js"></script>
+	<script>
+		var loginUser = JSON.parse(sessionStorage.loginUser)[0];
+		var oPlayer = document.getElementById('player');
+		var oRank = document.getElementById('rank');
+		var zhangAiNum = 0;
+		oPlayer.innerHTML = loginUser.username;
+		function updateUserData () {
+			$.post('http://localhost/snake_php/api/getUserById', {userId: loginUser.id}, function (res) {
+				sessionStorage.loginUser = res;
+				loginUser = JSON.parse(res)[0];
+				oRank.innerHTML = loginUser.rank;
+				setRank();
+			});
+		}
+		updateUserData();
+		function setRank () {
+			if (loginUser.rank == '青铜' || loginUser.rank == '无段位') {
+				snake.speed = 300;
+			}
+			if (loginUser.rank == '白银') {
+				snake.speed = 250;
+			}
+			if (loginUser.rank == '黄金') {
+				snake.speed = 230;
+			}
+			if (loginUser.rank == '白金') {
+				snake.speed = 220;
+			}
+			if (loginUser.rank == '钻石') {
+				snake.speed = 200;
+			}
+			if (loginUser.rank == '超凡大师') {
+				snake.speed = 150;
+			}
+			if (loginUser.rank == '最强王者') {
+				snake.speed = 100;
+			}
+		}
+		var over = document.getElementById('over');
+		over.onclick = function () {
+			window.location = 'main.html';
+		};
+		var rankArr = ['苏畏苏畏','青铜','白银','黄金','白金','钻石','超凡大师','最强王者','无段位'];
+		var timer = null;
+		var snake = {
+			direction : "right",
+			speed : 300,
+			body: [],
+			init : function(){
+				this.body = [];
+				this.direction = "right";
+				for(var i=0; i<3; i++){
+					var oSection = document.createElement("div");
+					oSection.className = "block section";
+					oSection.style.left = (3-i) * 20 +"px";
+					ground.container.appendChild(oSection);
+					this.body.push(oSection);
+				}
+			},
+			move : function(){
+				this.head = this.body[0];
+				var nextPos = {
+					left : this.head.offsetLeft,
+					top : this.head.offsetTop
+				};
+				if(this.direction == "left"){
+					nextPos.left -= 20;
+				}else if(this.direction == "up"){
+					nextPos.top -= 20;
+				}else if(this.direction == "right"){
+					nextPos.left += 20;
+				}
+				else if(this.direction == "down"){
+					nextPos.top += 20;
+				}
+				for(var i=0; i<this.body.length; i++){
+					var nowPos = {
+						left : this.body[i].offsetLeft,
+						top : this.body[i].offsetTop
+					};
+					this.body[i].style.left = nextPos.left + "px";
+					this.body[i].style.top = nextPos.top + "px";
+					nextPos = nowPos;
+				}
+				this.eat();
+			},
+			eat : function(){
+				var oScore = document.querySelectorAll('.score')[0];
+				// 蛇吃身体
+				for (let i=4; i<this.body.length; i++) {
+					if (this.head.offsetLeft == this.body[i].offsetLeft && this.head.offsetTop == this.body[i].offsetTop) {
+						snake.die();
+					}
+				}
+				if(this.head.offsetTop == food.offsetTop && this.head.offsetLeft == food.offsetLeft){
+					food.className = "block section";
+					this.body.push(food);
+					food = ground.createFood();
+					// 吃到食物加分
+					game.score += 100;
+					oScore.innerHTML = game.score;
+				}
+				// 蛇吃墙
+				if(this.head.offsetLeft == 1000 || this.head.offsetLeft == -20 || this.head.offsetTop == 500 || this.head.offsetTop == -20){
+					snake.die();
+				}
+				// 蛇吃障碍物
+				for (var i=0; i<zhangAiArr.length; i++) {
+					if (this.head.offsetLeft == zhangAiArr[i].offsetLeft && this.head.offsetTop == zhangAiArr[i].offsetTop) {
+						snake.die();
+					}
+				}
+			},
+			die : function(){
+				clearInterval(timer);
+				alert('gave over');
+				// 定义目标得分，如果本次得分小于目标得分就掉段，如果大于或等于目标得分就晋级
+				var targetScore = (parseInt(loginUser.rank_id) + 4) * 100;
+				if (loginUser.rank_id == 8) {
+					targetScore = 500;
+				}
+				if (game.score < targetScore) {
+					if (loginUser.rank_id != 8 && loginUser.rank_id != 1) { // 不是青铜也不是无段位
+						var rank = loginUser.rank_id - 1;
+						// 发请求 给玩家改段位
+						$.post('http://localhost/snake_php/api/updateRank', {userId: loginUser.id, rankId: rank}, function (res) {
+							if (res == 1) {
+								game.score = 0;
+								alert('您的段位已降至' + rankArr[rank]);
+								// 更新sessionStorage
+								updateUserData();
+								setTimeout(function () {
+									location.reload();
+								}, 100);
+							}
+						});
+					} else { // 如当前是青铜或无段位
+						game.score = 0;
+						alert('晋级失败');
+					}
+				} else { // 晋级
+					if (loginUser.rank_id != 7) { // 如果当前不是王者
+						var rank = 0;
+						if (loginUser.rank_id == 8) { // 如果当前无段位
+							rank = 1;
+						} else {
+							rank = parseInt(loginUser.rank_id) + 1;
+						}
+						// 发请求 给玩家改段位
+						$.post('http://localhost/snake_php/api/updateRank', {userId: loginUser.id, rankId: rank}, function (res) {
+							if (res == 1) {
+								game.score = 0;
+								alert('您的段位已升至' + rankArr[rank]);
+								// 更新sessionStorage
+								updateUserData();
+								setTimeout(function () {
+									location.reload();
+								}, 100);
+							}
+						});
+					} else { // 如果已经是王者，就不用晋级了
+						game.score = 0;
+						alert('您已经是最强王者了，太强了');
+					}
+				}
+				// 回到初始状态
+				var oScore = document.querySelectorAll('.score')[0];
+				oScore.innerHTML = 0;
+				var aSection = document.querySelectorAll('.section');
+				for (var i=0; i<aSection.length; i++) {
+					aSection[i].parentNode.removeChild(aSection[i]);
+				}
+				snake.init();
+			}
+		};
+		var ground = {
+			container: document.getElementById("ground"),
+			init : function(){
+				var ROWS = 25,COLS = 50;//定义草场的行数与列数
+				for(var i=0; i<ROWS; i++){
+					for(var j=0; j<COLS; j++){
+						var oDiv = document.createElement("div");
+						oDiv.className = "block";
+						this.container.appendChild(oDiv);
+					}			
+				}
+			},
+			createFood : function(){
+				do{
+					var bFlag = true;
+					//一个标示为，代表是否找到合适食物的位置，true表示找到，false表示未找到
+					//检测食物在ground边界内
+					var iRandLeft = Math.ceil(Math.random() * 980),
+					iRandTop = Math.ceil(Math.random() * 480);
+					var iLeft = iRandLeft - iRandLeft%20,
+					iTop = iRandTop - iRandTop % 20;
+					//检测食物是否和蛇身重合
+					for(var i=0; i<snake.body.length; i++){
+						if(snake.body[i].offsetLeft == iLeft && snake.body[i].offsetTop == iTop){
+							//重合
+							bFlag = false;
+							break;
+						}
+					}
+				}while(!bFlag);
+				var food = document.createElement("div");
+				food.className = "block food";
+				food.style.left = iLeft + "px";
+				food.style.top = iTop + "px";
+				ground.container.appendChild(food);
+				return food;
+			},
+			createZhangAi : function () {
+				do{
+					var bFlag = true;
+					//一个标示为，代表是否找到合适食物的位置，true表示找到，false表示未找到
+					//检测障碍在ground边界内
+					var iRandLeft = Math.ceil(Math.random() * 980),
+					iRandTop = Math.ceil(Math.random() * 480);
+					var iLeft = iRandLeft - iRandLeft%20,
+					iTop = iRandTop - iRandTop % 20;
+					//检测食物是否和蛇身重合
+					for(var i=0; i<snake.body.length; i++){
+						if(snake.body[i].offsetLeft == iLeft && snake.body[i].offsetTop == iTop || iLeft == food.offsetLeft && iTop == food.offsetTop){
+							//重合
+							bFlag = false;
+							break;
+						}
+					}
+				}while(!bFlag);
+				var zhangAi = document.createElement("div");
+				zhangAi.className = "block zhangAi";
+				zhangAi.style.left = iLeft + "px";
+				zhangAi.style.top = iTop + "px";
+				ground.container.appendChild(zhangAi);
+				return zhangAi;
+			}
+		};
+		var game = {
+			init : function(){//init初始化的方法用来完成页面加载时要完成的操作
+				ground.init();//初始化草场
+				snake.init();//初始化小蛇
+				food = ground.createFood();//生成一个食物
+				initZhangAi();
+				var oBtnStart = document.getElementById("start");
+				oBtnStart.onclick = function(){
+					game.start();
+				};
+				document.body.onkeydown = function(e){
+					e = e || event;
+					var keyCode = e.which || e.keyCode;
+					switch(keyCode){
+						case 38: 
+							if(snake.direction != "down")
+								snake.direction = "up";
+							break;
+						case 40:
+							if(snake.direction != "up")
+								snake.direction = "down";
+							break;
+						case 37:
+							if(snake.direction != "right")
+								snake.direction = "left";
+							break;
+						case 39:
+							if(snake.direction != "left")
+								snake.direction = "right";
+							break;
+					}
+				};
+			},
+			score: 0,
+			start : function(){
+				timer = setInterval(function(){
+					snake.move();
+				},snake.speed);
+			},
+			over : function(){
+				snake.move = null;
+				// alert("Game over!");
+			}
+		};
+
+		game.init();//游戏初始化
+
+		function initZhangAi () {
+			zhangAiArr = [];
+			if (loginUser.rank_id == 8) {
+				zhangAiNum = 2;
+			} else {
+				zhangAiNum = parseInt(loginUser.rank_id) + 2;
+			}
+			for (var i=0; i<zhangAiNum; i++) {
+				zhangAi = ground.createZhangAi();
+				zhangAiArr.push(zhangAi);
+			}
+		}
+	</script>
+</body>
+</html>
+
+
+

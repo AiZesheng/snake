@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>用户登录</title>
+	<link rel="stylesheet" href="bootstrap-3.3.5-dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/common.css">
+</head>
+<body>
+  <div id="login">
+    <h3 class="center pb-15">用户登录</h3>
+  	<form class="form-horizontal">
+  	  <div class="form-group">
+  	    <label for="inputEmail3" class="col-sm-2 control-label">用户名</label>
+  	    <div class="col-sm-10">
+  	      <input type="text" class="form-control" id="inputEmail3" placeholder="请输入用户名">
+  	    </div>
+  	  </div>
+  	  <div class="form-group">
+  	    <label for="inputPassword3" class="col-sm-2 control-label">密码</label>
+  	    <div class="col-sm-10">
+  	      <input type="password" class="form-control" id="inputPassword3" placeholder="请输入密码">
+  	    </div>
+  	  </div>
+  	  <div class="form-group">
+  	    <div class="col-sm-offset-2 col-sm-4">
+          <button id="doLogin" type="button" class="btn btn-success">&nbsp;&nbsp;登 录&nbsp;&nbsp;</button>
+        </div>
+        <div class="col-sm-offset-2 col-sm-4">
+          <button id="doRegist" type="button" class="btn btn-primary">&nbsp;&nbsp;注 册&nbsp;&nbsp;</button>
+        </div>
+  	  </div>
+  	</form>
+    <!-- 弹框 -->
+    <div id="usernameDialog" class="modal fade" tabindex="-1" role="dialog">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">提示</h4>
+          </div>
+          <div class="modal-body">
+            <h4>用户名不能为空</h4>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">确定</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    <!-- 弹框 -->
+    <div id="passwordDialog" class="modal fade" tabindex="-1" role="dialog">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">提示</h4>
+          </div>
+          <div class="modal-body">
+            <h4>密码不能为空</h4>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">确定</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    <div id="errorDialog" class="modal fade" tabindex="-1" role="dialog">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">提示</h4>
+          </div>
+          <div class="modal-body">
+            <h4>用户名或密码输入错误</h4>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">确定</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+  </div>
+
+	<script src="bootstrap-3.3.5-dist/js/jquery.min.js"></script>
+	<script src="bootstrap-3.3.5-dist/js/bootstrap.js"></script>
+  <script>
+    var oSubmit = document.getElementById('doLogin');
+    var oUsername = document.getElementById('inputEmail3');
+    var oPassword = document.getElementById('inputPassword3');
+    var oRegist = document.getElementById('doRegist');
+    oRegist.onclick = function () {
+      window.location = 'regist.html';
+    };
+    oSubmit.onclick = login;
+    oPassword.onkeyup = function (e) {
+      if (e.keyCode == 13) {
+        login();
+      }
+    };
+    function login () {
+      if (oUsername.value == '') {
+        $('#usernameDialog').modal();
+        return false;
+      }
+      if (oPassword.value == '') {
+        $('#passwordDialog').modal();
+        return false;
+      }
+      var params = {
+        username: oUsername.value,
+        password: oPassword.value
+      };
+      $.post('http://localhost/snake_php/api/login', params, function (res) {
+        if (res == 0) {
+          $('#errorDialog').modal();
+        } else { // 登录成功
+          sessionStorage.loginUser = res;
+          window.location = 'main.html';
+        }
+      });
+    }
+  </script>
+</body>
+</html>

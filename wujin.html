@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>无尽模式</title>
+	<link rel="stylesheet" href="css/common.css">
+	<style>
+		*{
+			margin: 0;
+			padding: 0;
+		}
+		a{
+			text-decoration: none;
+		}
+		#container{
+			width: 1000px;
+			border: 1px solid #000;
+			margin: 0 auto;
+		}
+		#ground{
+			width: 1000px;
+			height: 500px;
+			background: #ccc;
+			position: relative;
+		}
+		#ground .block{
+			width: 20px;
+			height: 20px;
+			background: #0f0;
+			float: left;
+		}
+		#ground .section{
+			width: 20px;
+			height: 20px;
+			background: #000;
+			float: left;
+			position: absolute;
+			top: 60px;
+		}
+		#ground .food{
+			width: 20px;
+			height: 20px;
+			background: red;
+			position: absolute;
+		}
+		#control{
+			width: 1000px;
+			height: 50px;
+		}
+		#start,#ranking-list,#insturction,#over{
+			display: block;
+			width: 90px;
+			height: 30px;
+			line-height: 30px;
+			background: #000;
+			color: #fff;
+			text-align: center;
+			float: right;
+			font-size: 13px;
+			margin-top: 10px;
+			margin-right: 20px;
+			opacity: 0.7;
+		}
+		#control a:hover{
+			opacity: 1;
+		}
+		#control p{
+			float: left;
+			line-height: 50px;
+			font-weight: bold;
+			padding-left: 20px;
+		}
+		#game-type {
+			text-align: center;
+		}
+		#header {
+			width: 1002px;
+			margin: 0 auto;
+			line-height: 40px;
+		}
+		.ml-660 {
+			margin-left: 660px;
+		}
+	</style>
+</head>
+<body>
+	<div id="header">
+		<span>游戏模式：</span><span>无尽模式</span>
+		<span class="ml-660">得分：</span><span class="score">0</span>
+	</div>
+	<div id="container">
+		<div id="ground"></div>
+		<div id="control">
+			<p>玩家：<span id="player"></span></p>
+			<a href="javascript:;" id="start">游戏开始</a>
+			<a href="javascript:;" id="over">退出游戏</a>
+			<a href="javascript:;" id="ranking-list">排行榜</a>
+		</div>
+	</div>
+	<script src="bootstrap-3.3.5-dist/js/jquery.min.js"></script>
+	<script>
+		var loginUser = JSON.parse(sessionStorage.loginUser)[0];
+		var oPlayer = document.getElementById('player');
+		oPlayer.innerHTML = loginUser.username;
+		var over = document.getElementById('over');
+		over.onclick = function () {
+			window.location = 'main.html';
+		};
+		var oRank = document.getElementById('ranking-list');
+		oRank.onclick = function () {
+			window.location = 'wujinRank.html';
+		};
+		var timer = null;
+		var snake = {
+			direction : "right",
+			speed : 200,
+			body: [],
+			init : function(){
+				this.body = [];
+				this.direction = "right";
+				this.speed = 200;
+				for(var i=0; i<3; i++){
+					var oSection = document.createElement("div");
+					oSection.className = "block section";
+					oSection.style.left = (3-i) * 20 +"px";
+					ground.container.appendChild(oSection);
+					this.body.push(oSection);
+				}
+			},
+			move : function(){
+				this.head = this.body[0];
+				var nextPos = {
+					left : this.head.offsetLeft,
+					top : this.head.offsetTop
+				};
+				if(this.direction == "left"){
+					nextPos.left -= 20;
+				}else if(this.direction == "up"){
+					nextPos.top -= 20;
+				}else if(this.direction == "right"){
+					nextPos.left += 20;
+				}
+				else if(this.direction == "down"){
+					nextPos.top += 20;
+				}
+				for(var i=0; i<this.body.length; i++){
+					var nowPos = {
+						left : this.body[i].offsetLeft,
+						top : this.body[i].offsetTop
+					};
+					this.body[i].style.left = nextPos.left + "px";
+					this.body[i].style.top = nextPos.top + "px";
+					nextPos = nowPos;
+				}
+				this.eat();
+			},
+			eat : function(){
+				var oScore = document.querySelectorAll('.score')[0];
+				// 蛇吃身体
+				for (let i=4; i<this.body.length; i++) {
+					if (this.head.offsetLeft == this.body[i].offsetLeft && this.head.offsetTop == this.body[i].offsetTop) {
+						snake.die();
+					}
+				}
+				if(this.head.offsetTop == food.offsetTop && this.head.offsetLeft == food.offsetLeft){
+					food.className = "block section";
+					this.body.push(food);
+					food = ground.createFood();
+					// 吃到食物加分
+					game.score += 100;
+					oScore.innerHTML = game.score;
+				}
+				//蛇吃墙
+				if(this.head.offsetLeft == 1000 || this.head.offsetLeft == -20 || this.head.offsetTop == 500 || this.head.offsetTop == -20){
+					snake.die();
+				}
+			},
+			die : function(){
+				clearInterval(timer);
+				alert("Game over!");
+				var loginUser = JSON.parse(sessionStorage.loginUser)[0];
+				var params = {
+					userId: loginUser.id,
+					score: game.score
+				};
+				// 向后端发请求，如果数据库没有该玩家的无尽模式的分数就直接存里，否则看这次的分数是否比以前的高
+				$.post('http://localhost/snake_php/api/getWujinByUserId', {userId: loginUser.id}, function (res) {
+					if (res == '啥也没有') {
+						// 发请求 存储
+						$.post('http://localhost/snake_php/api/saveWujin', params, function (res) {
+							if (res == 1) {
+								game.score = 0;
+							}
+						});
+					} else {
+						var obj = JSON.parse(res)[0];
+						if (game.score > obj.score) {
+							// 发请求 更新
+							$.post('http://localhost/snake_php/api/updateWujin', params, function (res) {
+								if (res == 1) {
+									game.score = 0;
+								}
+							});
+						} else {
+							game.score = 0;
+						}
+					}
+				});
+				// 回到初始状态
+				var oScore = document.querySelectorAll('.score')[0];
+				oScore.innerHTML = 0;
+				var aSection = document.querySelectorAll('.section');
+				for (var i=0; i<aSection.length; i++) {
+					aSection[i].parentNode.removeChild(aSection[i]);
+				}
+				snake.init();
+			}
+		};
+		var ground = {
+			container: document.getElementById("ground"),
+			init : function(){
+				var ROWS = 25,COLS = 50;//定义草场的行数与列数
+				for(var i=0; i<ROWS; i++){
+					for(var j=0; j<COLS; j++){
+						var oDiv = document.createElement("div");
+						oDiv.className = "block";
+						this.container.appendChild(oDiv);
+					}			
+				}
+			},
+			createFood : function(){
+				do{
+					var bFlag = true;
+					//一个标示为，代表是否找到合适食物的位置，true表示找到，false表示未找到
+					//检测食物在ground边界内
+					var iRandLeft = Math.ceil(Math.random() * 980),
+					iRandTop = Math.ceil(Math.random() * 480);
+					var iLeft = iRandLeft - iRandLeft%20,
+					iTop = iRandTop - iRandTop % 20;
+					//检测食物是否和蛇身重合
+					for(var i=0; i<snake.body.length; i++){
+						if(snake.body[i].offsetLeft == iLeft && snake.body[i].offsetTop == iTop){
+							//重合
+							bFlag = false;
+							break;
+						}
+					}
+				}while(!bFlag);
+				var food = document.createElement("div");
+				food.className = "block food";
+				food.style.left = iLeft + "px";
+				food.style.top = iTop + "px";
+				ground.container.appendChild(food);
+				return food;
+			}
+		};
+		var game = {
+			init : function(){//init初始化的方法用来完成页面加载时要完成的操作
+				ground.init();//初始化草场
+				snake.init();//初始化小蛇
+				food = ground.createFood();//生成一个食物
+				var oBtnStart = document.getElementById("start");
+				oBtnStart.onclick = function(){
+					game.start();
+				};
+				document.body.onkeydown = function(e){
+					e = e || event;
+					var keyCode = e.which || e.keyCode;
+					switch(keyCode){
+						case 38: 
+							if(snake.direction != "down")
+								snake.direction = "up";
+							break;
+						case 40:
+							if(snake.direction != "up")
+								snake.direction = "down";
+							break;
+						case 37:
+							if(snake.direction != "right")
+								snake.direction = "left";
+							break;
+						case 39:
+							if(snake.direction != "left")
+								snake.direction = "right";
+							break;
+					}
+				};
+			},
+			score: 0,
+			start : function(){
+				timer = setInterval(function(){
+					snake.move();
+				},snake.speed);
+			},
+			over : function(){
+				snake.move = null;
+				// alert("Game over!");
+			}
+		};
+
+		game.init();//游戏初始化
+	</script>
+</body>
+</html>
+
+
+
